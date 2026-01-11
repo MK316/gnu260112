@@ -1,4 +1,6 @@
-# ... [Keep your import section the same] ...
+# ------------------------------------------------------------
+# Lecture Slide Player (Multipage-ready) with Sharp Thumbnails
+# ------------------------------------------------------------
 import re
 import io
 import math
@@ -22,7 +24,11 @@ END_INDEX       = 21
 
 THUMBS_PER_PAGE = 6
 THUMB_COLS      = 6
+
+# IMPORTANT: thumbnails were blurry because this was too small (e.g., 21)
+# Generate thumbs closer to the display size (150px), e.g. 240~320.
 THUMB_MAX_W     = 280
+
 TIMEOUT         = 8
 
 RAW_BASE = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{GITHUB_BRANCH}/{FOLDER_PATH}"
@@ -54,20 +60,25 @@ def discover_pngs_by_pattern(raw_base: str, prefix: str, ext: str, start_i: int,
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def get_thumb_bytes(url: str, max_w: int = THUMB_MAX_W) -> bytes:
+    """
+    Build a reasonably-sized thumbnail (e.g., 280px wide) then display at 150px.
+    This prevents browser upscaling blur.
+    """
     raw = _get(url)
     im = Image.open(io.BytesIO(raw)).convert("RGBA")
+
     w, h = im.size
     if w > max_w:
         new_h = int(h * (max_w / w))
         im = im.resize((max_w, new_h), Image.LANCZOS)
-    if im.mode in ("RGBA", "LA"):
-        bg = Image.new("RGB", im.size, (255, 255, 255))
-        bg.paste(im, mask=im.split()[-1])
-        im = bg
-    else:
-        im = im.convert("RGB")
+
+    # Flatten transparency so thumbnails look consistent on white background
+    bg = Image.new("RGB", im.size, (255, 255, 255))
+    bg.paste(im, mask=im.split()[-1])
+    im = bg
+
     buf = io.BytesIO()
-    im.save(buf, format="WEBP", quality=80, method=6)
+    im.save(buf, format="WEBP", quality=92, method=6)  # slightly higher quality
     return buf.getvalue()
 
 # ---------- Discover slides ----------
@@ -85,7 +96,7 @@ st.session_state.setdefault("thumb_page", 1)
 st.session_state.setdefault("fit_to_height", True)
 st.session_state.setdefault("vh_percent", 88)
 st.session_state.setdefault("display_width_px", 1000)
-st.session_state.setdefault("thumbs_cache", {})
+st.session_state.setdefault("thumbs_cache", {})  # url -> bytes
 
 # --- Navigation callbacks ---
 def go_prev():
@@ -159,7 +170,6 @@ else:
         use_container_width=False
     )
 
-
 # ===== Thumbnails =====
 with st.expander("📑 Thumbnails", expanded=False):
     total = len(slides)
@@ -177,14 +187,22 @@ with st.expander("📑 Thumbnails", expanded=False):
     end = min(start + THUMBS_PER_PAGE, total)
     page_urls = slides[start:end]
 
-    cols = st.columns(min(THUMB_COLS, THUMBS_PER_PAGE))
+    cols = st.columns(min(THUMB_COLS, THUMBS_PER_PAGE), gap="small")
+
     for local_i, url in enumerate(page_urls):
         global_idx = start + local_i
         col = cols[local_i % len(cols)]
+
         with col:
+            # cache thumbnails in session_state to avoid regenerating during reruns
             if url not in st.session_state.thumbs_cache:
                 st.session_state.thumbs_cache[url] = get_thumb_bytes(url)
+
             thumb_bytes = st.session_state.thumbs_cache[url]
+
             if st.button(f"{global_idx + 1}", key=f"thumb_btn_{global_idx}", use_container_width=True):
                 st.session_state.slide_idx = global_idx
+                st.rerun()
+
+            # Display smaller than generated thumb to keep it sharp
             st.image(thumb_bytes, width=150)
