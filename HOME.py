@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.markdown("### 🐾 Streamlit into your class")
+st.markdown("### 🐾 Bringing Streamlit into Your Classroom")
 st.caption("2026. 01. 12. Workshop")
 
 
