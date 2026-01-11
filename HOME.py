@@ -13,11 +13,5 @@ st.image(
 st.image(
     "https://raw.githubusercontent.com/MK316/gnu260112/main/images/qr01.png",
     width=100,
-    caption="QR code (click below to enlarge)"
+    caption="Access QR"
 )
-
-with st.expander("🔍 View full size"):
-    st.image(
-        "https://raw.githubusercontent.com/MK316/gnu260112/main/images/qr01.png",
-        use_container_width=True
-    )
