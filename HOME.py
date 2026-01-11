@@ -1,9 +1,7 @@
 import streamlit as st
 
-st.markdown("### Streamlit into your class")
-st.caption(
-    "2026. 01. 12. Workshop"
-)
+st.markdown("### 🐾 Streamlit into your class")
+st.caption("2026. 01. 12. Workshop")
 
 
 col_l, col_c, col_r = st.columns([1, 2, 1])
