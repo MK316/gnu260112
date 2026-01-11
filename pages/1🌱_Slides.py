@@ -117,20 +117,13 @@ def go_to_slide():
 with st.sidebar:
     st.subheader("Controls")
 
-    nav = st.columns([1, 1, 1, 2])
-    with nav[0]:
-        st.button("⏮️", use_container_width=True, on_click=go_first)
-    with nav[1]:
-        st.button("◀️", use_container_width=True, on_click=go_prev)
-    with nav[2]:
-        st.button("▶️", use_container_width=True, on_click=go_next)
-    with nav[3]:
-        st.markdown(
-            f"<div style='text-align:right; font-weight:600;'>"
-            f"{st.session_state.slide_idx + 1} / {len(slides)}"
-            f"</div>",
-            unsafe_allow_html=True
-        )
+    # --- Slide counter only (no buttons) ---
+    st.markdown(
+        f"<div style='text-align:right; font-weight:700; font-size:16px;'>"
+        f"{st.session_state.slide_idx + 1} / {len(slides)}"
+        f"</div>",
+        unsafe_allow_html=True
+    )
 
     st.toggle("Fit main slide to screen height", key="fit_to_height")
     if st.session_state.fit_to_height:
@@ -138,6 +131,7 @@ with st.sidebar:
     else:
         st.slider("Slide width (px)", 700, 1400, key="display_width_px")
 
+    # --- Go to slide number ---
     st.number_input(
         "Go to Slide #",
         min_value=1,
@@ -146,6 +140,13 @@ with st.sidebar:
         key="slide_input",
         on_change=go_to_slide
     )
+
+    # --- Go to start button (placed below the box) ---
+    def go_first():
+        st.session_state.slide_idx = 0
+        st.session_state.slide_input = 1  # keep the box in sync
+
+    st.button("⏮️ Go to Start (Slide 1)", use_container_width=True, on_click=go_first)
 
 
 # ===== Main Slide =====
