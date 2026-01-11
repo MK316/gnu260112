@@ -2,10 +2,10 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 def main():
-    st.caption("💙 AI-X Board: Padlet")
+    st.caption("💙 Padlet: message board")
     st.write("➡️ Click the '+' sign to write.")
     # Padlet embed URL (you need to replace this with your actual Padlet embed URL)
-    padlet_url = "https://padlet.com/mirankim316/AIX25"
+    padlet_url = "https://padlet.com/mirankim316/260112"
 
     # Create an iframe to embed the Padlet
     padlet_iframe = f"<iframe src='{padlet_url}' width='100%' height='600' frameborder='0' allow='autoplay'></iframe>"
