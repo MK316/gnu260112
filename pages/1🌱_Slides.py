@@ -7,24 +7,22 @@ from PIL import Image
 import streamlit as st
 
 # ---------------- Page setup ----------------
-st.set_page_config(page_title="Lecture Slide Player - Chapter 1", layout="wide")
-st.markdown("#### 📗 Chapter 1: Articulation and Acoustics")
-st.markdown("[Reading01](https://github.com/MK316/classmaterial/blob/main/readings/Ch01.pdf)")
+st.set_page_config(page_title="Lecture Slide Player - Workshop", layout="wide")
 
 # ------------ CONFIG ------------
 GITHUB_OWNER  = "MK316"
-GITHUB_REPO   = "english-phonetics"
+GITHUB_REPO   = "gnu260112"
 GITHUB_BRANCH = "main"
-FOLDER_PATH   = "pages/lecture/Ch01"
+FOLDER_PATH   = "slides"
 
-FILENAME_PREFIX = "F25_Ch01."
+FILENAME_PREFIX = "260112."
 FILENAME_EXT    = ".png"
 START_INDEX     = 1
-END_INDEX       = 120
+END_INDEX       = 21
 
-THUMBS_PER_PAGE = 12
+THUMBS_PER_PAGE = 6
 THUMB_COLS      = 6
-THUMB_MAX_W     = 160
+THUMB_MAX_W     = 21
 TIMEOUT         = 8
 
 RAW_BASE = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{GITHUB_BRANCH}/{FOLDER_PATH}"
