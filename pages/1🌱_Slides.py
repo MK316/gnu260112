@@ -22,7 +22,7 @@ END_INDEX       = 21
 
 THUMBS_PER_PAGE = 6
 THUMB_COLS      = 6
-THUMB_MAX_W     = 21
+THUMB_MAX_W     = 280
 TIMEOUT         = 8
 
 RAW_BASE = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{GITHUB_BRANCH}/{FOLDER_PATH}"
