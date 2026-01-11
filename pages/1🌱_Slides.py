@@ -22,7 +22,7 @@ FILENAME_EXT    = ".png"
 START_INDEX     = 1
 END_INDEX       = 21
 
-THUMBS_PER_PAGE = 6
+THUMBS_PER_PAGE = 12
 THUMB_COLS      = 6
 
 # IMPORTANT: thumbnails were blurry because this was too small (e.g., 21)
