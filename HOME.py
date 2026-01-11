@@ -4,7 +4,7 @@ st.markdown("### 🐾 Streamlit into your class")
 st.caption("2026. 01. 12. Workshop")
 
 
-col_l, col_c, col_r = st.columns([1, 2, 1])
+col_l, col_c, col_r = st.columns([0.5, 2, 0.5])
 
 with col_c:
     st.markdown(
