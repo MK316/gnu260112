@@ -113,16 +113,23 @@ def go_to_slide():
 # ===== Sidebar =====
 with st.sidebar:
     st.subheader("Controls")
-    nav = st.columns([1, 1, 2])
+
+    # --- (−) [current/total] (+) ---
+    nav = st.columns([1, 3, 1], vertical_alignment="center")
+
     with nav[0]:
-        st.button("◀️", use_container_width=True, on_click=go_prev)
+        st.button("−", use_container_width=True, on_click=go_prev)
+
     with nav[1]:
-        st.button("▶️", use_container_width=True, on_click=go_next)
-    with nav[2]:
         st.markdown(
-            f"<div style='text-align:right; font-weight:600;'>{st.session_state.slide_idx + 1} / {len(slides)}</div>",
-            unsafe_allow_html=True
+            f"<div style='text-align:center; font-weight:700; font-size:16px;'>"
+            f"{st.session_state.slide_idx + 1} / {len(slides)}"
+            f"</div>",
+            unsafe_allow_html=True,
         )
+
+    with nav[2]:
+        st.button("+", use_container_width=True, on_click=go_next)
 
     st.toggle("Fit main slide to screen height", key="fit_to_height")
     if st.session_state.fit_to_height:
@@ -138,6 +145,7 @@ with st.sidebar:
         key="slide_input",
         on_change=go_to_slide
     )
+
 
 # ===== Main Slide =====
 idx = st.session_state.slide_idx
