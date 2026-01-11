@@ -41,6 +41,9 @@ def _get(url: str) -> bytes:
     r.raise_for_status()
     return r.content
 
+def go_first():
+    st.session_state.slide_idx = 0
+
 @st.cache_data(show_spinner=False, ttl=3600)
 def discover_pngs_by_pattern(raw_base: str, prefix: str, ext: str, start_i: int, end_i: int):
     found = []
@@ -114,22 +117,20 @@ def go_to_slide():
 with st.sidebar:
     st.subheader("Controls")
 
-    # --- (−) [current/total] (+) ---
-    nav = st.columns([1, 3, 1], vertical_alignment="center")
-
+    nav = st.columns([1, 1, 1, 2])
     with nav[0]:
-        st.button("−", use_container_width=True, on_click=go_prev)
-
+        st.button("⏮️", use_container_width=True, on_click=go_first)
     with nav[1]:
+        st.button("◀️", use_container_width=True, on_click=go_prev)
+    with nav[2]:
+        st.button("▶️", use_container_width=True, on_click=go_next)
+    with nav[3]:
         st.markdown(
-            f"<div style='text-align:center; font-weight:700; font-size:16px;'>"
+            f"<div style='text-align:right; font-weight:600;'>"
             f"{st.session_state.slide_idx + 1} / {len(slides)}"
             f"</div>",
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
-
-    with nav[2]:
-        st.button("+", use_container_width=True, on_click=go_next)
 
     st.toggle("Fit main slide to screen height", key="fit_to_height")
     if st.session_state.fit_to_height:
