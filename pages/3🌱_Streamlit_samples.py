@@ -9,7 +9,7 @@ st.markdown("---")
 
 # -------- Item 1 --------
 st.markdown("### 🍰 MK316 Homepage")
-st.markdown("🔗 https://github.com")
+st.markdown("🔗 https://mk316.github.io")
 st.caption(
     "개인 홈페이지 가능 (Github 계정) "
 )
