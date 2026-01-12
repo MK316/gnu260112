@@ -176,7 +176,7 @@ with tab_trends:
     </script>
     """
 
-    components.html(trends_html, height=550, scrolling=False)
+    components.html(trends_html, height=750, scrolling=False)
 
     st.markdown(
         """
