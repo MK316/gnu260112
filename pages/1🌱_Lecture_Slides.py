@@ -1,5 +1,6 @@
 # ------------------------------------------------------------
 # Lecture Slide Player (Multipage-ready) with Sharp Thumbnails
+# - supports suffix slides like 013a.png when 013.png is missing
 # ------------------------------------------------------------
 import re
 import io
@@ -22,51 +23,80 @@ FILENAME_EXT    = ".png"
 START_INDEX     = 1
 END_INDEX       = 21
 
+# If a numbered slide is missing (e.g., 013.png), try these suffixes in order.
+# Put "a" first since you deleted 013.png and only keep 013a.png.
+SUFFIX_TRY_ORDER = ["a", ""]  # tries 013a.png then 013.png (keep "" if you might restore later)
+# If you also use b/c: ["a","b","c",""]
+
 THUMBS_PER_PAGE = 12
 THUMB_COLS      = 6
-
-# IMPORTANT: thumbnails were blurry because this was too small (e.g., 21)
-# Generate thumbs closer to the display size (150px), e.g. 240~320.
 THUMB_MAX_W     = 280
-
 TIMEOUT         = 8
 
 RAW_BASE = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{GITHUB_BRANCH}/{FOLDER_PATH}"
 
+
 def natural_key(s: str):
     return [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", s)]
+
 
 def _get(url: str) -> bytes:
     r = requests.get(url, timeout=TIMEOUT)
     r.raise_for_status()
     return r.content
 
-def go_first():
-    st.session_state.slide_idx = 0
 
 @st.cache_data(show_spinner=False, ttl=3600)
-def discover_pngs_by_pattern(raw_base: str, prefix: str, ext: str, start_i: int, end_i: int):
-    found = []
+def url_exists(url: str) -> bool:
+    try:
+        r = requests.get(url, stream=True, timeout=TIMEOUT)
+        ok = r.status_code == 200
+        r.close()
+        return ok
+    except Exception:
+        return False
+
+
+@st.cache_data(show_spinner=False, ttl=3600)
+def discover_slides(raw_base: str, prefix: str, ext: str, start_i: int, end_i: int, suffix_order: list[str]):
+    """
+    Discover slides in strict numeric order:
+      For each number i, choose the FIRST existing candidate among:
+        prefix + i(3digits) + suffix + ext
+
+    This allows 013a.png to act as the 13th slide when 013.png is deleted.
+    """
+    urls = []
+    names = []
+
     for i in range(start_i, end_i + 1):
-        name = f"{prefix}{i:03d}{ext}"
-        url  = f"{raw_base}/{name}"
-        try:
-            r = requests.get(url, stream=True, timeout=TIMEOUT)
-            exists = r.status_code == 200
-            r.close()
-        except Exception:
-            exists = False
-        if exists:
-            found.append((name, url))
-    found.sort(key=lambda x: natural_key(x[0]))
-    return [u for _, u in found], [n for n, _ in found]
+        num = f"{i:03d}"
+
+        chosen = None
+        chosen_name = None
+
+        for suf in suffix_order:
+            name = f"{prefix}{num}{suf}{ext}"
+            url = f"{raw_base}/{name}"
+            if url_exists(url):
+                chosen = url
+                chosen_name = name
+                break
+
+        if chosen:
+            urls.append(chosen)
+            names.append(chosen_name)
+        else:
+            # if a slide is missing, we still continue (you can change to st.error if you want strict)
+            # This is useful if you intentionally have gaps.
+            pass
+
+    # Already in numeric order due to the loop; no need to sort
+    return urls, names
+
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def get_thumb_bytes(url: str, max_w: int = THUMB_MAX_W) -> bytes:
-    """
-    Build a reasonably-sized thumbnail (e.g., 280px wide) then display at 150px.
-    This prevents browser upscaling blur.
-    """
     raw = _get(url)
     im = Image.open(io.BytesIO(raw)).convert("RGBA")
 
@@ -75,22 +105,27 @@ def get_thumb_bytes(url: str, max_w: int = THUMB_MAX_W) -> bytes:
         new_h = int(h * (max_w / w))
         im = im.resize((max_w, new_h), Image.LANCZOS)
 
-    # Flatten transparency so thumbnails look consistent on white background
     bg = Image.new("RGB", im.size, (255, 255, 255))
     bg.paste(im, mask=im.split()[-1])
     im = bg
 
     buf = io.BytesIO()
-    im.save(buf, format="WEBP", quality=92, method=6)  # slightly higher quality
+    im.save(buf, format="WEBP", quality=92, method=6)
     return buf.getvalue()
 
+
 # ---------- Discover slides ----------
-slides, filenames = discover_pngs_by_pattern(
-    RAW_BASE, FILENAME_PREFIX, FILENAME_EXT, START_INDEX, END_INDEX
+slides, filenames = discover_slides(
+    RAW_BASE,
+    FILENAME_PREFIX,
+    FILENAME_EXT,
+    START_INDEX,
+    END_INDEX,
+    SUFFIX_TRY_ORDER
 )
 
 if not slides:
-    st.error("⚠️ No PNG files found.")
+    st.error("⚠️ No slide images found in the folder.")
     st.stop()
 
 # ---- Session state init ----
@@ -100,6 +135,7 @@ st.session_state.setdefault("fit_to_height", True)
 st.session_state.setdefault("vh_percent", 88)
 st.session_state.setdefault("display_width_px", 1000)
 st.session_state.setdefault("thumbs_cache", {})  # url -> bytes
+
 
 # --- Navigation callbacks ---
 def go_prev():
@@ -113,11 +149,15 @@ def go_to_slide():
     if 1 <= num <= len(slides):
         st.session_state.slide_idx = num - 1
 
+def go_first():
+    st.session_state.slide_idx = 0
+    st.session_state.slide_input = 1
+
+
 # ===== Sidebar =====
 with st.sidebar:
     st.subheader("Controls")
 
-    # --- Slide counter only (no buttons) ---
     st.markdown(
         f"<div style='text-align:right; font-weight:700; font-size:16px;'>"
         f"{st.session_state.slide_idx + 1} / {len(slides)}"
@@ -131,7 +171,6 @@ with st.sidebar:
     else:
         st.slider("Slide width (px)", 700, 1400, key="display_width_px")
 
-    # --- Go to slide number ---
     st.number_input(
         "Go to Slide #",
         min_value=1,
@@ -141,16 +180,12 @@ with st.sidebar:
         on_change=go_to_slide
     )
 
-    # --- Go to start button (placed below the box) ---
-    def go_first():
-        st.session_state.slide_idx = 0
-        st.session_state.slide_input = 1  # keep the box in sync
-
     st.button("⏮️ Go to Start (Slide 1)", use_container_width=True, on_click=go_first)
 
 
 # ===== Main Slide =====
 idx = st.session_state.slide_idx
+
 if st.session_state.fit_to_height:
     st.markdown(
         f"""
@@ -171,14 +206,15 @@ if st.session_state.fit_to_height:
         """,
         unsafe_allow_html=True,
     )
-    st.caption(f"Slide {idx + 1} / {len(slides)}")
 else:
     st.image(
         slides[idx],
-        caption=f"Slide {idx + 1} / {len(slides)}",
         width=st.session_state.display_width_px,
         use_container_width=False
     )
+
+st.caption(f"Slide {idx + 1} / {len(slides)}   ·   File: {filenames[idx]}")
+
 
 # ===== Thumbnails =====
 with st.expander("📑 Thumbnails", expanded=False):
@@ -204,15 +240,11 @@ with st.expander("📑 Thumbnails", expanded=False):
         col = cols[local_i % len(cols)]
 
         with col:
-            # cache thumbnails in session_state to avoid regenerating during reruns
             if url not in st.session_state.thumbs_cache:
                 st.session_state.thumbs_cache[url] = get_thumb_bytes(url)
-
-            thumb_bytes = st.session_state.thumbs_cache[url]
 
             if st.button(f"{global_idx + 1}", key=f"thumb_btn_{global_idx}", use_container_width=True):
                 st.session_state.slide_idx = global_idx
                 st.rerun()
 
-            # Display smaller than generated thumb to keep it sharp
-            st.image(thumb_bytes, width=150)
+            st.image(st.session_state.thumbs_cache[url], width=150)
