@@ -11,7 +11,7 @@ st.image(
 )
 
 st.image(
-    "https://raw.githubusercontent.com/MK316/gnu260112/main/images/qr01.png",
+    "https://raw.githubusercontent.com/MK316/gnu260112/main/images/gnu26112.png",
     width=100,
     caption="Access QR"
 )
