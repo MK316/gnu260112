@@ -7,7 +7,7 @@ st.set_page_config(page_title="Starter Platforms", layout="wide")
 # Tabs
 # =========================
 tab_intro, tab_trends = st.tabs(
-    ["🧩 시작을 위한 핵심 플랫폼", "📈 Google Trends로 보는 흐름"]
+    ["🌀 Online Links", "📈 Google Trends"]
 )
 
 # =========================================================
