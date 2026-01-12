@@ -170,5 +170,5 @@ with tab_trends:
     </script>
     """
 
-    components.html(trends_html, height=850, scrolling=False)
+    components.html(trends_html, height=750, scrolling=True)
 
