@@ -141,7 +141,7 @@ with tab_intro:
 # =========================================================
 with tab_trends:
 
-    st.markdown("## 📈 Google Trends로 보는 플랫폼 관심도 변화")
+    st.markdown("#### 📈 Google Trends로 보는 플랫폼 관심도 변화")
     st.caption(
         "소개되는 플랫폼이 언제부터 사회적으로 주목받기 시작했는지를 Google Trends 데이터를 통해 살펴봅니다. (2026년 1월 12일 검색 결과)"
     )
@@ -170,5 +170,5 @@ with tab_trends:
     </script>
     """
 
-    components.html(trends_html, height=750, scrolling=False)
+    components.html(trends_html, height=850, scrolling=False)
 
