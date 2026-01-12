@@ -143,15 +143,9 @@ with tab_trends:
 
     st.markdown("## 📈 Google Trends로 보는 플랫폼 관심도 변화")
     st.caption(
-        "디지털 도구와 AI 플랫폼이 언제부터 사회적으로 주목받기 시작했는지를 Google Trends 데이터를 통해 살펴봅니다."
+        "소개되는 플랫폼이 언제부터 사회적으로 주목받기 시작했는지를 Google Trends 데이터를 통해 살펴봅니다. (2026년 1월 12일 검색 결과)"
     )
 
-    st.markdown(
-        """
-- 이 그래프는 **특정 도구의 일시적 유행이 아닌, 장기적 변화 흐름**을 보여줍니다.
-- 전공 수업에서 디지털·AI 도구를 도입해야 하는 **시대적 배경**을 설명하는 자료로 활용할 수 있습니다.
-"""
-    )
 
     trends_html = """
     <script type="text/javascript" src="https://ssl.gstatic.com/trends_nrtr/4284_RC01/embed_loader.js"></script>
@@ -178,10 +172,3 @@ with tab_trends:
 
     components.html(trends_html, height=750, scrolling=False)
 
-    st.markdown(
-        """
-**활용 제안**
-- 교수자: “왜 지금 이런 수업이 필요한가”를 설명하는 도입 자료
-- 학생: 도구 학습이 개인 기술이 아니라 **사회적 요구**임을 이해
-"""
-    )
