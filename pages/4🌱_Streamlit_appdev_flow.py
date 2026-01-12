@@ -25,7 +25,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(
 # Tab 1: 준비 단계
 # -----------------------------
 with tab1:
-    st.header("① 준비 단계 (Accounts): 무엇이 필요할까?")
+    st.header("① 준비 단계 (Getting Ready): 무엇이 필요할까?")
 
     st.markdown("""
     Streamlit 앱을 만들기 위해서는 **아주 기본적인 준비만** 있으면 된다.
